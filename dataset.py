@@ -47,9 +47,7 @@ class HandPoseDataset(Dataset):
             index = 5 * index + rand
 
         image_name = self.image_paths[index]
-        image = cv2.imread(
-            image_name, cv2.IMREAD_GRAYSCALE
-        )  # binary image with value {0, 255}
+        image = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)  # binary image with value {0, 255}
         image = 255 - image
 
         if image.shape != (224, 224):
@@ -116,9 +114,7 @@ class FreiHandDataset(Dataset):
             self.joints = json.load(fh)
             self.joints = (np.array(self.joints)[split_ids] * 1000).tolist()
 
-        self.image_paths = [
-            os.path.join(path, f"training/mask/{i:08}.jpg") for i in split_ids
-        ]
+        self.image_paths = [os.path.join(path, f"training/mask/{i:08}.jpg") for i in split_ids]
 
         with open(os.path.join(path, camera_Ks_file), "r") as fh:
             self.camera_Ks = json.load(fh)
@@ -130,9 +126,7 @@ class FreiHandDataset(Dataset):
 
     def __getitem__(self, index):
         image_name = self.image_paths[index]
-        image = cv2.imread(
-            image_name, cv2.IMREAD_GRAYSCALE
-        )  # grayscale image 224 x 224
+        image = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)  # grayscale image 224 x 224
 
         if self.augment:
             # label in (u, v, d) coordinate
@@ -151,9 +145,7 @@ class FreiHandDataset(Dataset):
             # rotation and scaling
             RandomRotate = np.random.randint(-180, 180)
             RandomScale = 0.2 * np.random.rand() + 0.9
-            matrix = cv2.getRotationMatrix2D(
-                (224 / 2, 224 / 2), RandomRotate, RandomScale
-            )
+            matrix = cv2.getRotationMatrix2D((224 / 2, 224 / 2), RandomRotate, RandomScale)
 
             image, label_uvd[:, :2], mesh_uvd[:, :2] = self.augment_transform(
                 image, label_uvd[:, :2], mesh_uvd[:, :2], matrix
@@ -166,9 +158,7 @@ class FreiHandDataset(Dataset):
                 fy=self.camera_Ks[index][1][1],
             )
 
-            mesh_xyz = self.pixel2world(
-                mesh_uvd, fx=self.camera_Ks[index][0][0], fy=self.camera_Ks[index][1][1]
-            )
+            mesh_xyz = self.pixel2world(mesh_uvd, fx=self.camera_Ks[index][0][0], fy=self.camera_Ks[index][1][1])
         else:
             label_xyz = self.joints[index]
             mesh_xyz = self.vertices[index]
@@ -177,13 +167,9 @@ class FreiHandDataset(Dataset):
         mesh = torch.tensor(mesh_xyz)
 
         # Binarize the image (value in {0, 255})
-        image_ref = cv2.threshold(image, thresh=127, maxval=1, type=cv2.THRESH_BINARY)[
-            1
-        ].astype("uint8")
+        image_ref = cv2.threshold(image, thresh=127, maxval=1, type=cv2.THRESH_BINARY)[1].astype("uint8")
 
-        image = cv2.threshold(image, thresh=127, maxval=255, type=cv2.THRESH_BINARY)[
-            1
-        ].astype("uint8")
+        image = cv2.threshold(image, thresh=127, maxval=255, type=cv2.THRESH_BINARY)[1].astype("uint8")
 
         # Extract contour and compute distance transform
         contour = cv2.Laplacian(image_ref, -1)
@@ -197,9 +183,7 @@ class FreiHandDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        focal_len = torch.tensor(
-            [self.camera_Ks[index][0][0], self.camera_Ks[index][1][1]]
-        )
+        focal_len = torch.tensor([self.camera_Ks[index][0][0], self.camera_Ks[index][1][1]])
 
         return image, focal_len, image_ref, label, dist_map, mesh
 
@@ -280,9 +264,7 @@ class FreiHandDataset_Estimated(Dataset):
             self.joints = json.load(fh)
             self.joints = (np.array(self.joints)[split_ids] * 1000).tolist()
 
-        self.image_paths = [
-            os.path.join(path, f"training/mask/{i:08}.jpg") for i in split_ids
-        ]
+        self.image_paths = [os.path.join(path, f"training/mask/{i:08}.jpg") for i in split_ids]
 
         with open(os.path.join(path, camera_Ks_file), "r") as fh:
             self.camera_Ks = json.load(fh)
@@ -294,9 +276,7 @@ class FreiHandDataset_Estimated(Dataset):
 
     def __getitem__(self, index):
         image_name = self.image_paths[index]
-        image = cv2.imread(
-            image_name, cv2.IMREAD_GRAYSCALE
-        )  # grayscale image 224 x 224
+        image = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)  # grayscale image 224 x 224
 
         if self.augment:
             # label in (u, v, d) coordinate
@@ -315,9 +295,7 @@ class FreiHandDataset_Estimated(Dataset):
             # rotation and scaling
             RandomRotate = np.random.randint(-180, 180)
             RandomScale = 0.2 * np.random.rand() + 0.9
-            matrix = cv2.getRotationMatrix2D(
-                (224 / 2, 224 / 2), RandomRotate, RandomScale
-            )
+            matrix = cv2.getRotationMatrix2D((224 / 2, 224 / 2), RandomRotate, RandomScale)
 
             image, label_uvd[:, :2], mesh_uvd[:, :2] = self.augment_transform(
                 image, label_uvd[:, :2], mesh_uvd[:, :2], matrix
@@ -330,9 +308,7 @@ class FreiHandDataset_Estimated(Dataset):
                 fy=self.camera_Ks[index][1][1],
             )
 
-            mesh_xyz = self.pixel2world(
-                mesh_uvd, fx=self.camera_Ks[index][0][0], fy=self.camera_Ks[index][1][1]
-            )
+            mesh_xyz = self.pixel2world(mesh_uvd, fx=self.camera_Ks[index][0][0], fy=self.camera_Ks[index][1][1])
         else:
             label_xyz = self.joints[index]
             mesh_xyz = self.vertices[index]
@@ -341,13 +317,9 @@ class FreiHandDataset_Estimated(Dataset):
         mesh = torch.tensor(mesh_xyz)
 
         # Binarize the image (value in {0, 255})
-        image_ref = cv2.threshold(image, thresh=127, maxval=1, type=cv2.THRESH_BINARY)[
-            1
-        ].astype("uint8")
+        image_ref = cv2.threshold(image, thresh=127, maxval=1, type=cv2.THRESH_BINARY)[1].astype("uint8")
 
-        image = cv2.threshold(image, thresh=127, maxval=255, type=cv2.THRESH_BINARY)[
-            1
-        ].astype("uint8")
+        image = cv2.threshold(image, thresh=127, maxval=255, type=cv2.THRESH_BINARY)[1].astype("uint8")
 
         # Extract contour and compute distance transform
         contour = cv2.Laplacian(image_ref, -1)
@@ -361,9 +333,7 @@ class FreiHandDataset_Estimated(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        focal_len = torch.tensor(
-            [self.camera_Ks[index][0][0], self.camera_Ks[index][1][1]]
-        )
+        focal_len = torch.tensor([self.camera_Ks[index][0][0], self.camera_Ks[index][1][1]])
 
         return image, focal_len, image_ref, label, dist_map, mesh
 
