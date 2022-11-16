@@ -128,7 +128,6 @@ class FreiHandDataset(Dataset):
 
     def __getitem__(self, index):
         image_name = str(self.image_paths[index])
-        print(image_name)
         image = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)  # grayscale image 224 x 224
 
         if self.augment:
