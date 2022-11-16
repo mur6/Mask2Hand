@@ -106,15 +106,15 @@ class FreiHandDataset(Dataset):
         self.augment = augment
 
         # Configurations
-        joints_anno_file = "training_xyz.json"
-        camera_Ks_file = "training_K.json"
-        vertices_anno_file = "training_verts.json"
+        joints_anno_file = "evaluation_xyz.json"
+        camera_Ks_file = "evaluation_K.json"
+        vertices_anno_file = "evaluation_verts.json"
 
         with open(os.path.join(path, joints_anno_file), "r") as fh:
             self.joints = json.load(fh)
             self.joints = (np.array(self.joints)[range_from:range_to] * 1000).tolist()
 
-        self.image_paths = [os.path.join(path, f"training/mask/{i:08}.jpg") for i in range(range_from, range_to)]
+        self.image_paths = [os.path.join(path, f"evaluation/mask/{i:08}.jpg") for i in range(range_from, range_to)]
 
         with open(os.path.join(path, camera_Ks_file), "r") as fh:
             self.camera_Ks = json.load(fh)
