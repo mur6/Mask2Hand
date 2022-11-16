@@ -7,7 +7,7 @@ import random
 import json
 import torch
 from torch.utils.data import Dataset
-
+from pathlib import Path
 
 ##################################################
 ## Synthetic MANO Dataset
@@ -114,7 +114,9 @@ class FreiHandDataset(Dataset):
             self.joints = json.load(fh)
             self.joints = (np.array(self.joints)[range_from:range_to] * 1000).tolist()
 
-        self.image_paths = [os.path.join(path, f"evaluation/mask/{i:08}.jpg") for i in range(range_from, range_to)]
+        # self.image_paths = [os.path.join(path, f"evaluation/mask/{i:08}.jpg") for i in range(range_from, range_to)]
+        image_dir = Path(path) / "evaluation" / "rgb"
+        self.image_paths = list(sorted(image_dir.glob("*.jpg")))[range_from:range_to]
 
         with open(os.path.join(path, camera_Ks_file), "r") as fh:
             self.camera_Ks = json.load(fh)
