@@ -91,11 +91,9 @@ class FreiHandDataset(Dataset):
     def __init__(
         self,
         path,
-        joints_anno_file,
-        camera_Ks_file,
-        data_split_file,
-        vertices_anno_file,
         split="train",
+        range_from=None,
+        range_to=None,
         transform=None,
         augment=False,
     ):
@@ -107,22 +105,24 @@ class FreiHandDataset(Dataset):
         self.transform = transform
         self.augment = augment
 
-        with open(os.path.join(path, data_split_file), "r") as fh:
-            split_ids = json.load(fh)[f"{split}_ids"]
+        # Configurations
+        joints_anno_file = "training_xyz.json"
+        camera_Ks_file = "training_K.json"
+        vertices_anno_file = "training_verts.json"
 
         with open(os.path.join(path, joints_anno_file), "r") as fh:
             self.joints = json.load(fh)
-            self.joints = (np.array(self.joints)[split_ids] * 1000).tolist()
+            self.joints = (np.array(self.joints)[range_from:range_to] * 1000).tolist()
 
-        self.image_paths = [os.path.join(path, f"training/mask/{i:08}.jpg") for i in split_ids]
+        self.image_paths = [os.path.join(path, f"training/mask/{i:08}.jpg") for i in range(range_from, range_to)]
 
         with open(os.path.join(path, camera_Ks_file), "r") as fh:
             self.camera_Ks = json.load(fh)
-            self.camera_Ks = np.array(self.camera_Ks)[split_ids].tolist()
+            self.camera_Ks = np.array(self.camera_Ks)[range_from:range_to].tolist()
 
         with open(os.path.join(path, vertices_anno_file), "r") as fh:
             self.vertices = json.load(fh)
-            self.vertices = (np.array(self.vertices)[split_ids] * 1000).tolist()
+            self.vertices = (np.array(self.vertices)[range_from:range_to] * 1000).tolist()
 
     def __getitem__(self, index):
         image_name = self.image_paths[index]
